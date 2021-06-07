@@ -1,0 +1,582 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = null;
+}
+@model InterGlobal.Controllers.ViewModel
+<hr />
+<h2>Index</h2>
+<b>
+    NOT:<i>
+        Hizmet Noktası olan şubelerin özellikleri: <br />
+        -Yurt İçi Teslimat <br />
+        -Yurt Dışı Teslimat <br />
+        -Uçak (Vip) Teslimat <br />
+        -Değerli Teslimat <br />
+        -E-Ticaret Teslimat
+        <br />
+        <br />
+        <br />
+        Teslimat Noktası olan şubelerin özellikleri: <br />
+        -E Ticaret Teslimat
+    </i>
+    <br />
+    <br />
+    <hr />
+</b>
+<div class="row">
+    <div class="col-md-4"></div>
+    <div class="col-md-4">Hizmet Noktaları<input type="checkbox" value="Hizmet Noktası" style="margin-right:55px;" id="hizmetnokta" name="hizmetnokta" />Teslimat Noktaları<input type="checkbox" id="teslimatnokta" value="Teslimat Noktası" name="teslimatnokta" /></div>
+    <div class="col-md-4"></div>
+</div>
+<div class="row">
+    <div class="col-md-4"></div>
+    <div class="col-md-4">
+        <select name="sehir" id="sehir" class="form-control">
+            <option value="Türkiye">Şehir Seçiniz</option>
+            @{
+                var sehirler = (from il in Model.migros
+                                select new
+                                { il.il }).Distinct();
+            }
+            @foreach (var item in sehirler)
+            {
+                <option value="@item.il">@item.il</option>
+            }
+        </select>
+        <select name="ilce" id="ilce" class="form-control">
+            <option>
+                İlçe Seçiniz
+            </option>
+            <option value="Bahçelievler">
+                Bahçelievler
+            </option>
+            <option value="Kadıköy">
+                Kadıköy
+            </option>
+        </select>
+    </div>
+    <div class="col-md-4"></div>
+</div>
+
+<br />
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div style="height:400px;width:100%;" id="defaultmap">
+
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div style="height:400px;width:100%;" id="hizmetmap">
+                
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div style="height:400px;width:100%;" id="teslimmap">
+
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div style="height:400px;width:100%;" id="allmap">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<br />
+
+<br />
+
+<br />
+
+<br />
+
+
+
+@*//$.getJSON('/BayiBul/konumlar', function (data) {
+    //    for (var i = 0; i < data.Result; i++) {
+
+    //        AddMarker({
+    //            coordinates: { lat: data.Result[item].lat, lng: data.Result[item].lng },
+    //            content: '<b> y Şubesi</b> <br /> Telefon:05539230101 <br /> Adres: y Mahallesi, y Sokak, Numara: 10 Daire: 01 <br /> <center> <b>Hizmetler </b> </center> <br /> -Teslim Alma <br /> -Teslim Etme <br /> -Kargo Paketleme <br /> -Dağıtım'
+    //        });
+
+    //    }
+    //}*@
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script>
+    $(document).ready(function () {
+        $('#ilce').css('display', 'none')
+
+        $('#hizmetmap').css('display', 'none')
+        $('#teslimmap').css('display', 'none')
+        $('#allmap').css('display','none')
+
+        getLocation();
+
+
+    });
+    $("#hizmetnokta").change(function () {
+        if (this.checked == true && $('#teslimatnokta').prop('checked') == true) {
+            
+
+            $('#defaultmap').hide();
+            $('#allmap').show();
+            $('#teslimmap').hide();
+            $('#hizmetmap').hide();
+
+
+            //$('#defaultmap').css('display', 'none')
+            //$('#allmap').css('display', 'inline')
+            //$('#teslimmap').css('display', 'none')
+            //$('#hizmetmap').css('display', 'none')
+        }
+        else if (this.checked) {
+            
+            $('#defaultmap').hide();
+            $('#allmap').hide();
+            $('#teslimmap').hide();
+            $('#hizmetmap').show();
+        }
+        else if ($('#teslimatnokta').prop('checked') == true) {
+            
+            $('#defaultmap').hide();
+            $('#allmap').hide();
+            $('#teslimmap').show();
+            $('#hizmetmap').hide();
+        }
+        else {
+            
+
+            $('#defaultmap').show();
+            $('#allmap').hide();
+            $('#teslimmap').hide();
+            $('#hizmetmap').hide();
+
+            //$('#defaultmap').css('display', 'inline')
+            //$('#allmap').css('display', 'none')
+            //$('#teslimmap').css('display', 'none')
+            //$('#hizmetmap').css('display', 'none')
+        }
+
+    });
+    $("#teslimatnokta").change(function () {
+        if (this.checked == true && $('#hizmetnokta').prop('checked') == true) {
+            
+
+            $('#defaultmap').hide();
+            $('#allmap').show();
+            $('#teslimmap').hide();
+            $('#hizmetmap').hide();
+
+
+            //$('#defaultmap').css('display', 'none')
+            //$('#allmap').css('display', 'inline')
+            //$('#teslimmap').css('display', 'none')
+            //$('#hizmetmap').css('display', 'none')
+        }
+        else if (this.checked) {
+            
+            $('#defaultmap').hide();
+            $('#allmap').hide();
+            $('#teslimmap').show();
+            $('#hizmetmap').hide();
+        }
+        else if ($('#hizmetnokta').prop('checked') == true) {
+           
+            $('#defaultmap').hide();
+            $('#allmap').hide();
+            $('#teslimmap').show();
+            $('#hizmetmap').hide();
+        }
+        else {
+           
+
+            $('#defaultmap').show();
+            $('#allmap').hide();
+            $('#teslimmap').hide();
+            $('#hizmetmap').hide();
+
+            //$('#defaultmap').css('display', 'inline')
+            //$('#allmap').css('display', 'none')
+            //$('#teslimmap').css('display', 'none')
+            //$('#hizmetmap').css('display', 'none')
+        }
+
+    });
+    function getLocation() {
+        // Tarayıcınızın  Geolocation API desteği var mı?
+        if (!navigator.geolocation) {
+            alert('Tarayıcınız Geolocation desteği bulunmuyor')
+        } else {
+            navigator.geolocation.getCurrentPosition(function (position) {
+                // Mevcut konumumuzun kordinatlarını alıyoruz.
+                var lat = position.coords.latitude
+                var lng = position.coords.longitude
+                initMap(null, null, null, lat, lng);
+                initMaps(null, null, null, lat, lng);
+                initMapss(null, null, null, lat, lng);
+                initMapsss(null, null, null, lat, lng);
+
+            })
+        }
+    }
+
+    $("#sehir").change(function () {
+        $.ajax({
+            url: "https://maps.googleapis.com/maps/api/geocode/json?address=" + $(this).val() + "&key=AIzaSyA6rXvNhtdqw2ONyb5pu5LZ333ocS6_MgQ", success: function (result) {
+                console.log(result.results[0].geometry.location.lat);
+                initMap(result.results[0].geometry.location.lat, result.results[0].geometry.location.lng, "sehir")
+                initMaps(result.results[0].geometry.location.lat, result.results[0].geometry.location.lng, "sehir")
+                initMapss(result.results[0].geometry.location.lat, result.results[0].geometry.location.lng, "sehir")
+                initMapsss(result.results[0].geometry.location.lat, result.results[0].geometry.location.lng, "sehir")
+                if ($('#hizmetnokta').is(':checked') == true) {
+                    
+                }
+                else if ($('#teslimnokta').is(':checked') == true) {
+
+                }
+                else {
+                    
+                }
+                var selectedil = $('#sehir').val()
+
+
+                $.ajax({
+                    method: "post",
+                    url: "/BayiBul/konumlar",
+                    data: { iladi: selectedil },
+                    success: function (e) {
+                        console.log(e);
+                        console.log(e.ilce);
+                        $("#ilce optioitemtem").each(function () {
+                            $(this).remove();
+                        });
+                        var resss = e.split(',');
+
+
+                        for (var i = 0; i < resss.length; i++) {
+                            $("#ilce").append($('<option>', { value: resss[i].replaceAll('"', ""), text: resss[i].replaceAll('"',"") }));
+                        }
+
+                    }
+
+                })
+
+
+
+
+                @*@foreach (var item in Model.ililcemahalle.Where(x=>x.il==)
+                                {
+
+                            $('#ilce').append(new Option('TEST1', 'Samatya'))
+                                }*@
+
+
+                $('#ilce').css('display', 'inline')
+            }
+                });
+    });
+
+    $("#ilce").change(function () {
+        $.ajax({
+            url: "https://maps.googleapis.com/maps/api/geocode/json?address=" + $("#sehir").val()+" "+$(this).val() + "&key=AIzaSyA6rXvNhtdqw2ONyb5pu5LZ333ocS6_MgQ", success: function (result) {
+                console.log(result.results[0].geometry.location.lat);
+                initMap(result.results[0].geometry.location.lat, result.results[0].geometry.location.lng, "ilce")
+                initMaps(result.results[0].geometry.location.lat, result.results[0].geometry.location.lng, "ilce")
+                initMapss(result.results[0].geometry.location.lat, result.results[0].geometry.location.lng, "ilce")
+                initMapsss(result.results[0].geometry.location.lat, result.results[0].geometry.location.lng, "ilce")
+            }
+        });
+    });
+
+
+    //Default Map
+    function initMap(lat = null, lng = null, secim = null, firstlat = null, firstlng = null) {
+        var options = {
+            zoom: 6,
+            center: { lat: 38.734802, lng: 35.467987 }
+        };
+        if (firstlat != null && firstlng != null) {
+            console.log(firstlat)
+            console.log(firstlng)
+            options = {
+                zoom: 10,
+                center: { lat: firstlat, lng: firstlng }
+            };
+        }
+        if (lat != null) {
+            if (secim == "sehir") {
+                options = {
+                    zoom: 9,
+                    center: { lat: lat, lng: lng }
+                };
+            }
+            else {
+                options = {
+                    zoom: 13,
+                    center: { lat: lat, lng: lng }
+                };
+            }
+        }
+
+        var image = '/Content/img/logo.png';
+        var map = new google.maps.Map(document.getElementById('defaultmap'), options);
+
+        //AddMarker({
+        //    coordinates: { lat: 40.977779, lng: 27.515278 },
+        //    content: '<b> y Şubesi</b> <br /> Telefon:05539230101 <br /> Adres: y Mahallesi, y Sokak, Numara: 10 Daire: 01 <br /> <center> <b>Hizmetler </b> </center> <br /> -Teslim Alma <br /> -Teslim Etme <br /> -Kargo Paketleme <br /> -Dağıtım'
+        //});
+
+
+
+
+
+
+                    function AddMarker(options) {
+                        var marker = new google.maps.Marker({
+                position: options.coordinates,
+                map: map,
+                icon: image
+            });
+
+            var infoWindow = new google.maps.InfoWindow({
+                content: options.content
+            });
+
+            marker.addListener('click', function () {
+                infoWindow.open(map, marker);
+            });
+        }
+    }
+     //Hizmet Map
+    function initMaps(lat = null, lng = null, secim = null, firstlat = null, firstlng = null) {
+        var options = {
+            zoom: 6,
+            center: { lat: 38.734802, lng: 35.467987 }
+        };
+        if (firstlat != null && firstlng != null) {
+            console.log(firstlat)
+            console.log(firstlng)
+            options = {
+                zoom: 10,
+                center: { lat: firstlat, lng: firstlng }
+            };
+        }
+        if (lat != null) {
+            if (secim == "sehir") {
+                options = {
+                    zoom: 9,
+                    center: { lat: lat, lng: lng }
+                };
+            }
+            else {
+                options = {
+                    zoom: 13,
+                    center: { lat: lat, lng: lng }
+                };
+            }
+        }
+
+        var image = '/Content/img/logo.png';
+        var map = new google.maps.Map(document.getElementById('hizmetmap'), options);
+
+        //AddMarker({
+        //    coordinates: { lat: 40.977779, lng: 27.515278 },
+        //    content: '<b> y Şubesi</b> <br /> Telefon:05539230101 <br /> Adres: y Mahallesi, y Sokak, Numara: 10 Daire: 01 <br /> <center> <b>Hizmetler </b> </center> <br /> -Teslim Alma <br /> -Teslim Etme <br /> -Kargo Paketleme <br /> -Dağıtım'
+        //});
+        @foreach (var item in Model.hizmets)
+        {
+            <text>
+            AddMarker({
+                coordinates: { lat: @item.lat, lng: @item.lng},
+            content: '<b> @item.Magaza_Ad  - TESLİMAT NOKTASI</b> <br /> Telefon:@item.Telefon <br />  Adres: @item.Adres <br /> <center> <b>Hizmetler </b> </center> <br /> -Teslim Alma <br /> -Teslim Etme <br /> -Kargo Paketleme <br /> -Dağıtım'
+            });
+        </text>
+        }
+
+
+                    function AddMarker(options) {
+                        var marker = new google.maps.Marker({
+                position: options.coordinates,
+                map: map,
+                icon: image
+            });
+
+            var infoWindow = new google.maps.InfoWindow({
+                content: options.content
+            });
+
+            marker.addListener('click', function () {
+                infoWindow.open(map, marker);
+            });
+        }
+    }
+
+      //Teslim Map
+    function initMapss(lat = null, lng = null, secim = null, firstlat = null, firstlng = null) {
+        var options = {
+            zoom: 6,
+            center: { lat: 38.734802, lng: 35.467987 }
+        };
+        if (firstlat != null && firstlng != null) {
+            console.log(firstlat)
+            console.log(firstlng)
+            options = {
+                zoom: 10,
+                center: { lat: firstlat, lng: firstlng }
+            };
+        }
+        if (lat != null) {
+            if (secim == "sehir") {
+                options = {
+                    zoom: 9,
+                    center: { lat: lat, lng: lng }
+                };
+            }
+            else {
+                options = {
+                    zoom: 13,
+                    center: { lat: lat, lng: lng }
+                };
+            }
+        }
+
+        var image = '/Content/img/logo.png';
+        var map = new google.maps.Map(document.getElementById('teslimmap'), options);
+
+        //AddMarker({
+        //    coordinates: { lat: 40.977779, lng: 27.515278 },
+        //    content: '<b> y Şubesi</b> <br /> Telefon:05539230101 <br /> Adres: y Mahallesi, y Sokak, Numara: 10 Daire: 01 <br /> <center> <b>Hizmetler </b> </center> <br /> -Teslim Alma <br /> -Teslim Etme <br /> -Kargo Paketleme <br /> -Dağıtım'
+        //});
+        @{
+            int magazaid = Model.teslims.FirstOrDefault().Magaza_id;
+            InterGlobal.Models.igc_bayilerEntities db = new InterGlobal.Models.igc_bayilerEntities();
+
+            string magazatel;
+            magazatel = db.iletisim_bilgileri.FirstOrDefault(x => x.Magaza_No == magazaid).Telefon1.ToString();
+            string magazaadres;
+            magazaadres= db.iletisim_bilgileri.FirstOrDefault(x => x.Magaza_No == magazaid).Standart_Adres.ToString();
+        }
+        @foreach (var item in Model.teslims)
+        {
+            <text>
+            AddMarker({
+                coordinates: { lat: @item.lat, lng: @item.lng},
+                content: '<b> @item.Magaza_Ad  - TESLİMAT NOKTASI</b> <br /> Telefon:@magazatel <br />  Adres: @magazaadres <br /> <center> <b>Hizmetler </b> </center> <br /> -Teslim Alma <br /> -Teslim Etme <br /> -Kargo Paketleme <br /> -Dağıtım'
+            });
+        </text>
+        }
+
+
+                    function AddMarker(options) {
+                        var marker = new google.maps.Marker({
+                position: options.coordinates,
+                map: map,
+                icon: image
+            });
+
+            var infoWindow = new google.maps.InfoWindow({
+                content: options.content
+            });
+
+            marker.addListener('click', function () {
+                infoWindow.open(map, marker);
+            });
+        }
+    }
+
+
+    //ALL MAP
+    function initMapsss(lat = null, lng = null, secim = null, firstlat = null, firstlng = null) {
+        var options = {
+            zoom: 6,
+            center: { lat: 38.734802, lng: 35.467987 }
+        };
+        if (firstlat != null && firstlng != null) {
+            console.log(firstlat)
+            console.log(firstlng)
+            options = {
+                zoom: 10,
+                center: { lat: firstlat, lng: firstlng }
+            };
+        }
+        if (lat != null) {
+            if (secim == "sehir") {
+                options = {
+                    zoom: 9,
+                    center: { lat: lat, lng: lng }
+                };
+            }
+            else {
+                options = {
+                    zoom: 13,
+                    center: { lat: lat, lng: lng }
+                };
+            }
+        }
+
+        var image = '/Content/img/logo.png';
+        var map = new google.maps.Map(document.getElementById('allmap'), options);
+
+        //AddMarker({
+        //    coordinates: { lat: 40.977779, lng: 27.515278 },
+        //    content: '<b> y Şubesi</b> <br /> Telefon:05539230101 <br /> Adres: y Mahallesi, y Sokak, Numara: 10 Daire: 01 <br /> <center> <b>Hizmetler </b> </center> <br /> -Teslim Alma <br /> -Teslim Etme <br /> -Kargo Paketleme <br /> -Dağıtım'
+        //});
+        @{
+            int xmagazaid = Model.teslims.FirstOrDefault().Magaza_id;
+            InterGlobal.Models.igc_bayilerEntities xdb = new InterGlobal.Models.igc_bayilerEntities();
+
+            string xmagazatel;
+            xmagazatel = xdb.iletisim_bilgileri.FirstOrDefault(x => x.Magaza_No == magazaid).Telefon1.ToString();
+            string xmagazaadres;
+            xmagazaadres= xdb.iletisim_bilgileri.FirstOrDefault(x => x.Magaza_No == magazaid).Standart_Adres.ToString();
+        }
+        @foreach (var item in Model.teslims)
+        {
+            <text>
+            AddMarker({
+                coordinates: { lat: @item.lat, lng: @item.lng},
+                content: '<b> @item.Magaza_Ad  - TESLİMAT NOKTASI</b> <br /> Telefon:@xmagazatel <br />  Adres: @xmagazaadres <br /> <center> <b>Hizmetler </b> </center> <br /> -Teslim Alma <br /> -Teslim Etme <br /> -Kargo Paketleme <br /> -Dağıtım'
+            });
+        </text>
+        }
+
+         @foreach (var item in Model.hizmets)
+        {
+            <text>
+            AddMarker({
+                coordinates: { lat: @item.lat, lng: @item.lng},
+            content: '<b> @item.Magaza_Ad  - TESLİMAT NOKTASI</b> <br /> Telefon:@item.Telefon <br />  Adres: @item.Adres <br /> <center> <b>Hizmetler </b> </center> <br /> -Teslim Alma <br /> -Teslim Etme <br /> -Kargo Paketleme <br /> -Dağıtım'
+            });
+        </text>
+        }
+
+                    function AddMarker(options) {
+                        var marker = new google.maps.Marker({
+                position: options.coordinates,
+                map: map,
+                icon: image
+            });
+
+            var infoWindow = new google.maps.InfoWindow({
+                content: options.content
+            });
+
+            marker.addListener('click', function () {
+                infoWindow.open(map, marker);
+            });
+        }
+    }
+
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap&libraries=&v=weekly" defer></script>
+<hr />
